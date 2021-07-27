@@ -1,0 +1,7 @@
+eval $(thefuck --alias fuck)
+eval $(thefuck --alias fcuk)
+eval $(thefuck --alias fukc)
+eval $(thefuck --alias ufck)
+
+alias sauth=start-author.sh
+alias scont=start-content-service.sh
