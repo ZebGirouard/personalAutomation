@@ -3,5 +3,10 @@ eval $(thefuck --alias fcuk)
 eval $(thefuck --alias fukc)
 eval $(thefuck --alias ufck)
 
+alias makex=make-executable.sh
+
 alias sauth=start-author.sh
 alias scont=start-content-service.sh
+
+alias kauth=kill-author.sh
+alias kcont=kill-content-service.sh

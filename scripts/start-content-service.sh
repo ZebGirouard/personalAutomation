@@ -1,13 +1,21 @@
-#!/bin/sh
+#!/bin/bash
 
 echo 'Starting Content Service Legacy'
 
-cd ~/Coding/work/content_service
+output_path="$OUTPUTS/csLegacyProcesses"
+cd "$HOME/Coding/work/content_service"
 bundle install
 docker-compose up &
-if $1 == 'test'
-then
-    ./test/run.sh
+pid=$!
+echo $pid
+echo $pid >$output_path
+if [ "$1" = "test" ]; then
+    ./test/run.sh &
 else
-    bundle exec rackup
+    bundle exec rackup &
 fi
+
+pid=$!
+echo '2nd one'
+echo $pid
+echo $pid >>$output_path
