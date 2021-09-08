@@ -1,12 +1,33 @@
+alias bi="bundle install"
+
 eval $(thefuck --alias fuck)
 eval $(thefuck --alias fcuk)
 eval $(thefuck --alias fukc)
 eval $(thefuck --alias ufck)
 
-alias makex=make-executable.sh
-
-alias sauth=start-author.sh
-alias scont=start-content-service.sh
+alias gss="git status"
+alias ga="git add ."
+alias gb="git branch"
+alias gc="git checkout"
+function gcb { git checkout -b "$1" }
+alias gcd="git checkout develop"
+function gcm { git commit -m "$1" }
+alias gma="git merge --abort"
+alias gpo="git pull origin"
+alias gpod="git pull origin develop"
 
 alias kauth=kill-author.sh
+alias kmono=kill-monolith.sh
 alias kcont=kill-content-service.sh
+
+alias makex=make-executable.sh
+
+alias pag="ps -ax | grep"
+
+alias sauth=start-author.sh
+alias smono=start-monolith.sh
+alias scont=start-content-service.sh
+
+alias sz="source ~/.zshrc"
+
+alias yi="yarn install"
