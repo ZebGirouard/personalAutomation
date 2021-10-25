@@ -1,4 +1,9 @@
+alias avn="aws-vault exec nonprod --"
+alias avp="aws-vault exec prod --"
+
 alias bi="bundle install"
+
+alias berc="bundle exec rails console"
 
 eval $(thefuck --alias fuck)
 eval $(thefuck --alias fcuk)
@@ -12,6 +17,7 @@ alias gc="git checkout"
 function gcb { git checkout -b "$1" }
 alias gcd="git checkout develop"
 function gcm { git commit -m "$1" }
+alias gfo="git fetch origin"
 alias gma="git merge --abort"
 alias gpo="git pull origin"
 alias gpod="git pull origin develop"
@@ -28,6 +34,7 @@ alias sauth=start-author.sh
 alias smono=start-monolith.sh
 alias scont=start-content-service.sh
 
+alias sbp="source ~/.bash_profile"
 alias sz="source ~/.zshrc"
 
 alias yi="yarn install"
