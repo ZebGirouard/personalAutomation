@@ -40,4 +40,4 @@ alias sz="source ~/.zshrc"
 alias yi="yarn install"
 
 alias zoos="aws-vault exec nonprod -- aws ec2 describe-instances --filters Name=instance-state-code,Values=16 --query 'Reservations[*].Instances[*].[InstanceId, PrivateIpAddress, Tags[?Key==\`Deploy_Namespace\`] | [0].Value]' --output table | grep -v None"
-alias zoossh='aws-vault exec nonprod -- aws ssm start-session --target'
+alias zoossh="aws-vault exec nonprod -- aws ssm start-session --target"
