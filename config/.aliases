@@ -18,9 +18,9 @@ alias gss="git status"
 alias ga="git add ."
 alias gb="git branch"
 alias gc="git checkout"
-function gcb { git checkout -b "$1" }
+function gcb { git checkout -b "$1" ;}
 alias gcd="git checkout develop"
-function gcm { git commit -m "$1" }
+function gcm { git commit -m "$1" ;}
 alias gfo="git fetch origin"
 alias gma="git merge --abort"
 alias gpo="git pull origin"
