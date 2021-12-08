@@ -4,6 +4,10 @@ alias avp="aws-vault exec prod --"
 alias bi="bundle install"
 
 alias berc="bundle exec rails console"
+alias berr="bundle exec rails runner"
+
+alias dcr="docker-compose run"
+alias dcu="docker-compose up"
 
 eval $(thefuck --alias fuck)
 eval $(thefuck --alias fcuk)
@@ -29,6 +33,8 @@ alias kcont=kill-content-service.sh
 alias makex=make-executable.sh
 
 alias pag="ps -ax | grep"
+
+alias dcrScript="docker-compose run --rm web bundle exec rails runner"
 
 alias sauth=start-author.sh
 alias smono=start-monolith.sh
