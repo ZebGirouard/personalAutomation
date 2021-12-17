@@ -7,6 +7,8 @@ alias berc="bundle exec rails console"
 alias berr="bundle exec rails runner"
 
 alias dcr="docker-compose run"
+alias dcrberc="docker-compose run --rm web bundle exec rails console"
+alias dcrScript="docker-compose run --rm web bundle exec rails runner"
 alias dcu="docker-compose up"
 
 eval $(thefuck --alias fuck)
@@ -27,18 +29,20 @@ alias gpo="git pull origin"
 alias gpod="git pull origin develop"
 
 alias kauth=kill-author.sh
-alias kmono=kill-monolith.sh
 alias kcont=kill-content-service.sh
+alias kmono=kill-monolith.sh
+alias kpsy=kill-psyduck.sh
 
 alias makex=make-executable.sh
 
 alias pag="ps -ax | grep"
 
-alias dcrScript="docker-compose run --rm web bundle exec rails runner"
+alias pp="netstat -vanp tcp | grep"
 
 alias sauth=start-author.sh
-alias smono=start-monolith.sh
 alias scont=start-content-service.sh
+alias smono=start-monolith.sh
+alias spsy=start-psyduck.sh
 
 alias sbp="source ~/.bash_profile"
 alias sz="source ~/.zshrc"
