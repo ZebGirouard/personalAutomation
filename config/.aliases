@@ -1,5 +1,6 @@
 alias avn="aws-vault exec nonprod --"
 alias avp="aws-vault exec prod --"
+alias awr="aws-vault clear & unset AWS_VAULT"
 
 alias bi="bundle install"
 
@@ -16,6 +17,7 @@ eval $(thefuck --alias fcuk)
 eval $(thefuck --alias fukc)
 eval $(thefuck --alias ufck)
 
+alias gsh="git stash --include-untracked"
 alias gss="git status"
 alias ga="git add ."
 alias gb="git branch"
@@ -27,15 +29,23 @@ alias gfo="git fetch origin"
 alias gma="git merge --abort"
 alias gpo="git pull origin"
 alias gpod="git pull origin develop"
+alias gsp="git stash pop"
 
 alias kauth=kill-author.sh
 alias kcont=kill-content-service.sh
 alias kmono=kill-monolith.sh
 alias kpsy=kill-psyduck.sh
 
+alias l='git log --pretty=format:"%Cred%h%Creset - %C(bold blue)<%an>%Creset %Cgreen(%cr)%Creset %C(cyan)- %C(reset)%s %C(yellow)%d%Creset" --abbrev-commit --date=relative --color=always -20'
+
 alias makex=make-executable.sh
 
+alias ornd='open "rndebugger://set-debugger-loc?host=localhost&port=8081"'
+alias osim="open -a Simulator"
+
 alias pag="ps -ax | grep"
+
+alias pusheen='git push -u origin `git rev-parse --abbrev-ref HEAD`'
 
 alias pp="netstat -vanp tcp | grep"
 
