@@ -22,13 +22,18 @@ alias gss="git status"
 alias ga="git add ."
 alias gb="git branch"
 alias gc="git checkout"
+alias gca="git checkout master"
 function gcb { git checkout -b "$1" ;}
 alias gcd="git checkout develop"
+alias gci="git checkout main"
 function gcm { git commit -m "$1" ;}
 alias gfo="git fetch origin"
 alias gma="git merge --abort"
 alias gpo="git pull origin"
 alias gpod="git pull origin develop"
+alias gpom="git pull origin master"
+alias gpon="git pull origin main"
+alias gsh="git stash"
 alias gsp="git stash pop"
 
 alias kauth=kill-author.sh
@@ -38,6 +43,10 @@ alias kpsy=kill-psyduck.sh
 
 alias l='git log --pretty=format:"%Cred%h%Creset - %C(bold blue)<%an>%Creset %Cgreen(%cr)%Creset %C(cyan)- %C(reset)%s %C(yellow)%d%Creset" --abbrev-commit --date=relative --color=always -20'
 
+alias mloc="yarn next dev -p 3030"
+alias mps="make pre-start"
+alias mrd="make run-dev"
+alias mwd="make watch-dev"
 alias makex=make-executable.sh
 
 alias ornd='open "rndebugger://set-debugger-loc?host=localhost&port=8081"'
