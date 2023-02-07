@@ -7,6 +7,7 @@ alias bi="bundle install"
 alias berc="bundle exec rails console"
 alias berr="bundle exec rails runner"
 
+alias dcd="docker-compose down"
 alias dcr="docker-compose run"
 alias dcrberc="docker-compose run --rm web bundle exec rails console"
 alias dcrScript="docker-compose run --rm web bundle exec rails runner"
@@ -22,17 +23,17 @@ alias gss="git status"
 alias ga="git add ."
 alias gb="git branch"
 alias gc="git checkout"
-alias gca="git checkout master"
+alias gcr="git checkout master"
 function gcb { git checkout -b "$1" ;}
 alias gcd="git checkout develop"
-alias gci="git checkout main"
 function gcm { git commit -m "$1" ;}
+alias gcn="git checkout main"
 alias gfo="git fetch origin"
 alias gma="git merge --abort"
 alias gpo="git pull origin"
 alias gpod="git pull origin develop"
-alias gpom="git pull origin master"
 alias gpon="git pull origin main"
+alias gpor="git pull origin master"
 alias gsh="git stash"
 alias gsp="git stash pop"
 
@@ -43,9 +44,14 @@ alias kpsy=kill-psyduck.sh
 
 alias l='git log --pretty=format:"%Cred%h%Creset - %C(bold blue)<%an>%Creset %Cgreen(%cr)%Creset %C(cyan)- %C(reset)%s %C(yellow)%d%Creset" --abbrev-commit --date=relative --color=always -20'
 
+alias mbd="make build"
+alias mcd="make compose-down"
+alias mcu="make compose-up"
 alias mloc="yarn next dev -p 3030"
 alias mps="make pre-start"
 alias mrd="make run-dev"
+alias msf="make start-fast"
+alias mtw="make test-watch"
 alias mwd="make watch-dev"
 alias makex=make-executable.sh
 
