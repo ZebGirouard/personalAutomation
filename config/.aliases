@@ -28,8 +28,12 @@ function gcb { git checkout -b "$1" ;}
 alias gcd="git checkout develop"
 function gcm { git commit -m "$1" ;}
 alias gcn="git checkout main"
+function gfl { git push origin "$1" --force-with-lease ;}
 alias gfo="git fetch origin"
+alias ghead="git push origin HEAD"
 alias gma="git merge --abort"
+function gnv { git push origin "$1" --no-verify ;}
+function gnvfl { git push origin "$1" --no-verify --force-with-lease ;}
 alias gpo="git pull origin"
 alias gpod="git pull origin develop"
 alias gpon="git pull origin main"
@@ -53,12 +57,16 @@ alias mrd="make run-dev"
 alias msf="make start-fast"
 alias mtw="make test-watch"
 alias mwd="make watch-dev"
+function mwds { DEV_HTTPS_MODE=true make watch-dev ;}
+alias mwt="make watch-testing"
+function mwts { DEV_HTTPS_MODE=true make watch-testing ;}
 alias makex=make-executable.sh
 
 alias ornd='open "rndebugger://set-debugger-loc?host=localhost&port=8081"'
 alias osim="open -a Simulator"
 
 alias pag="ps -ax | grep"
+alias p="pnpm"
 
 alias pusheen='git push -u origin `git rev-parse --abbrev-ref HEAD`'
 
