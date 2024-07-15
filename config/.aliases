@@ -3,7 +3,6 @@ alias avp="aws-vault exec prod --"
 alias awr="aws-vault clear & unset AWS_VAULT"
 
 alias bi="bundle install"
-
 alias berc="bundle exec rails console"
 alias berr="bundle exec rails runner"
 
@@ -39,6 +38,7 @@ alias gpod="git pull origin develop"
 alias gpon="git pull origin main"
 alias gpor="git pull origin master"
 alias gsh="git stash"
+alias gshm="git stash push -m"
 alias gsp="git stash pop"
 
 alias kauth=kill-author.sh
@@ -62,6 +62,8 @@ alias mwt="make watch-testing"
 function mwts { DEV_HTTPS_MODE=true make watch-testing ;}
 alias makex=make-executable.sh
 
+alias nuke="make clean-all && make install-all-dependencies"
+
 alias ornd='open "rndebugger://set-debugger-loc?host=localhost&port=8081"'
 alias osim="open -a Simulator"
 
@@ -79,6 +81,8 @@ alias spsy=start-psyduck.sh
 
 alias sbp="source ~/.bash_profile"
 alias sz="source ~/.zshrc"
+
+alias test-marketplace="yarn run mocha --parallel --jobs=5 test/models/Marketplace test/resources/marketplace test/jobs/marketplace"
 
 alias yi="yarn install"
 
