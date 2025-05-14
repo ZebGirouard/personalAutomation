@@ -1,3 +1,7 @@
+function auroraId() {
+  printf '%s\n' "${(U)1}00000000"
+}
+
 alias avn="aws-vault exec nonprod --"
 alias avp="aws-vault exec prod --"
 alias awr="aws-vault clear & unset AWS_VAULT"
@@ -17,8 +21,6 @@ eval $(thefuck --alias fcuk)
 eval $(thefuck --alias fukc)
 eval $(thefuck --alias ufck)
 
-alias gsh="git stash --include-untracked"
-alias gss="git status"
 alias ga="git add ."
 alias gb="git branch"
 alias gc="git checkout"
@@ -30,17 +32,21 @@ alias gcn="git checkout main"
 function gfl { git push origin "$1" --force-with-lease ;}
 alias gfo="git fetch origin"
 alias ghead="git push origin HEAD"
+alias glive="git pull origin HEAD --rebase && git push origin HEAD"
 alias gma="git merge --abort"
 function gnv { git push origin "$1" --no-verify ;}
+alias gnvh="git push origin HEAD --no-verify"
 function gnvfl { git push origin "$1" --no-verify --force-with-lease ;}
+alias gnvflh="git push origin HEAD --no-verify --force-with-lease"
 alias gpo="git pull origin"
 alias gpod="git pull origin develop"
 alias gpon="git pull origin main"
 alias gpor="git pull origin master"
 alias gporb="git pull origin master --rebase"
-alias gsh="git stash"
+alias gsh="git stash --include-untracked"
 alias gshm="git stash push -m"
 alias gsp="git stash pop"
+alias gss="git status"
 
 alias kauth=kill-author.sh
 alias kcont=kill-content-service.sh
@@ -49,20 +55,28 @@ alias kpsy=kill-psyduck.sh
 
 alias l='git log --pretty=format:"%Cred%h%Creset - %C(bold blue)<%an>%Creset %Cgreen(%cr)%Creset %C(cyan)- %C(reset)%s %C(yellow)%d%Creset" --abbrev-commit --date=relative --color=always -20'
 
+function mongoId() {
+  printf '%s\n' "${(L)1:0:-8}"
+}
+
 alias mbd="make build"
 alias mcd="make compose-down"
 alias mcu="make compose-up"
+alias mfd="make fixtures-dev"
+alias mft="make fixtures-test"
 alias mloc="yarn next dev -p 3030"
 alias mps="make pre-start"
 alias mrd="make run-dev"
 alias msf="make start-fast"
-alias mtw="make test-watch"
+alias mtw="CLEANUP_ON_FAILURE=yes make test-watch"
+alias mtwd="CLEANUP_ON_FAILURE=yes DEBUG=yes make test-watch"
 alias mwd="make watch-dev"
 function mwds { DEV_HTTPS_MODE=true make watch-dev ;}
 alias mwt="make watch-testing"
 function mwts { DEV_HTTPS_MODE=true make watch-testing ;}
 alias makex=make-executable.sh
 
+alias noder="NODE_ENV=testing node -r ts-node/register/transpile-only"
 alias nuke="make clean-all && make install-all-dependencies"
 
 alias ornd='open "rndebugger://set-debugger-loc?host=localhost&port=8081"'
@@ -83,7 +97,7 @@ alias spsy=start-psyduck.sh
 alias sbp="source ~/.bash_profile"
 alias sz="source ~/.zshrc"
 
-alias test-marketplace="yarn run mocha --parallel --jobs=5 test/models/Marketplace test/resources/marketplace test/jobs/marketplace"
+alias test-marketplace="yarn run mocha --parallel --jobs=5 test/models/Marketplace test/resources/marketplace test/jobs/marketplace test/businessLogic/marketplace"
 
 alias yi="yarn install"
 
