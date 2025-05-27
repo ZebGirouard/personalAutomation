@@ -1,0 +1,12 @@
+source ~/.api_tz_dont_delete
+test -f '/Users/zebgirouard/.make-completion.zsh' && source '/Users/zebgirouard/.make-completion.zsh'
+test -f '/Users/zebgirouard/.git-completion.zsh' && source '/Users/zebgirouard/.git-completion.zsh'
+
+eval "$(pyenv init -)"
+
+eval "$(fnm env --use-on-cd)"
+autoload -Uz compinit && compinit
+
+if [ -f '/Users/zebgirouard/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/zebgirouard/google-cloud-sdk/path.zsh.inc'; fi
+
+if [ -f '/Users/zebgirouard/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/zebgirouard/google-cloud-sdk/completion.zsh.inc'; fi
