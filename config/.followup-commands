@@ -1,4 +1,3 @@
-source ~/.api_tz_dont_delete
 test -f '/Users/zebgirouard/.make-completion.zsh' && source '/Users/zebgirouard/.make-completion.zsh'
 test -f '/Users/zebgirouard/.git-completion.zsh' && source '/Users/zebgirouard/.git-completion.zsh'
 
