@@ -4,6 +4,8 @@ test -f '/Users/zebgirouard/.git-completion.zsh' && source '/Users/zebgirouard/.
 
 eval "$(pyenv init -)"
 
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
 eval "$(fnm env --use-on-cd)"
 autoload -Uz compinit && compinit
 
