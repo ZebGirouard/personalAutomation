@@ -48,10 +48,9 @@ alias gshm="git stash push -m"
 alias gsp="git stash pop"
 alias gss="git status"
 
-alias kauth=kill-author.sh
-alias kcont=kill-content-service.sh
-alias kmono=kill-monolith.sh
-alias kpsy=kill-psyduck.sh
+alias kctl-test='kubectl --context="aws/us-west-1-test"'
+alias kctl-ci='kubectl --context="aws/us-east-1-ci"'
+alias kctl-prod='kubectl --context="aws/us-east-1-prod"'
 
 alias l='git log --pretty=format:"%Cred%h%Creset - %C(bold blue)<%an>%Creset %Cgreen(%cr)%Creset %C(cyan)- %C(reset)%s %C(yellow)%d%Creset" --abbrev-commit --date=relative --color=always -20'
 
@@ -89,15 +88,11 @@ alias pusheen='git push -u origin `git rev-parse --abbrev-ref HEAD`'
 
 alias pp="netstat -vanp tcp | grep"
 
-alias sauth=start-author.sh
-alias scont=start-content-service.sh
-alias smono=start-monolith.sh
-alias spsy=start-psyduck.sh
-
 alias sbp="source ~/.bash_profile"
 alias sz="source ~/.zshrc"
 
 alias test-marketplace="yarn run mocha --parallel --jobs=5 test/models/Marketplace test/resources/marketplace test/jobs/marketplace test/businessLogic/marketplace"
+alias tmk="test-marketplace"
 
 alias yi="yarn install"
 
