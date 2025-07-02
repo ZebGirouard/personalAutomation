@@ -1,9 +1,13 @@
 test -f '/Users/zebgirouard/.make-completion.zsh' && source '/Users/zebgirouard/.make-completion.zsh'
 test -f '/Users/zebgirouard/.git-completion.zsh' && source '/Users/zebgirouard/.git-completion.zsh'
 
-eval "$(pyenv init -)"
-
 eval "$(/opt/homebrew/bin/brew shellenv)"
+
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+
+eval "$(pyenv init --path)"
+eval "$(pyenv init -)"
 
 eval "$(fnm env --use-on-cd)"
 autoload -Uz compinit && compinit
