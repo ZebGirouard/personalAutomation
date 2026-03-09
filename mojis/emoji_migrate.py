@@ -257,7 +257,18 @@ def run_export(args):
     images_dir = output / "images"
     images_dir.mkdir(exist_ok=True)
 
-    manifest_emoji = []
+    # Load existing manifest if present — export is additive-only
+    manifest_path = output / "manifest.json"
+    existing_emoji = []
+    existing_names = set()
+    if manifest_path.exists():
+        with open(manifest_path) as f:
+            existing = json.load(f)
+        existing_emoji = existing.get("emoji", [])
+        existing_names = {e["name"] for e in existing_emoji}
+        print(f"Existing manifest: {len(existing_names)} emoji (will only add new ones).")
+
+    new_emoji = []
 
     if mode in ("uploaded", "both"):
         # --- Uploaded emoji: session auth (xoxc + d cookie) ---
@@ -275,7 +286,9 @@ def run_export(args):
         uploaded = fetch_uploaded_emoji(session_token, d_cookie, user_id)
         real_uploaded = [e for e in uploaded if not e["is_alias"]]
         for e in real_uploaded:
-            manifest_emoji.append({
+            if e["name"] in existing_names:
+                continue
+            new_emoji.append({
                 "name": e["name"],
                 "url": e["url"],
                 "aliases": e["aliases"],
@@ -303,41 +316,137 @@ def run_export(args):
                     my_names.add(original)
         print(f"  {len(my_names)} are custom emoji (builtins excluded).")
 
-        # Deduplicate against already-added uploaded emoji
-        already = {e["name"] for e in manifest_emoji}
+        # Deduplicate against existing manifest + newly-added uploaded emoji
+        already = existing_names | {e["name"] for e in new_emoji}
         for name in sorted(my_names):
             if name in already:
                 continue
-            manifest_emoji.append({
+            new_emoji.append({
                 "name": name,
                 "url": custom_emoji[name],
                 "aliases": alias_map.get(name, []),
                 "source": "used",
             })
 
-    if not manifest_emoji:
-        print("No emoji found to export.")
+    if not new_emoji:
+        print("No new emoji to add.")
         return
 
-    # Download images
-    download_emoji_images(manifest_emoji, images_dir)
+    # Download images for new emoji only
+    download_emoji_images(new_emoji, images_dir)
 
-    # Write manifest
+    # Merge with existing manifest
+    all_emoji = existing_emoji + new_emoji
     manifest = {
         "source_workspace": "unknown",
         "exported_at": datetime.now(timezone.utc).isoformat(),
         "mode": mode,
-        "emoji": manifest_emoji,
+        "emoji": all_emoji,
     }
-    manifest_path = output / "manifest.json"
     with open(manifest_path, "w") as f:
         json.dump(manifest, f, indent=2)
 
-    uploaded_count = sum(1 for e in manifest_emoji if e.get("source") == "uploaded")
-    used_count = sum(1 for e in manifest_emoji if e.get("source") == "used")
-    print(f"\nDone. {len(manifest_emoji)} emoji exported ({uploaded_count} uploaded, {used_count} used).")
+    print(f"\nDone. {len(new_emoji)} new emoji added ({len(all_emoji)} total in manifest).")
     print(f"  Manifest: {manifest_path}")
     print(f"  Images:   {images_dir}")
+
+
+# ---------------------------------------------------------------------------
+# Review (gallery + sync)
+# ---------------------------------------------------------------------------
+
+def run_review(args):
+    input_dir = Path(args.input)
+    manifest_path = input_dir / "manifest.json"
+    images_dir = input_dir / "images"
+
+    if not manifest_path.exists():
+        print(f"Error: {manifest_path} not found.", file=sys.stderr)
+        sys.exit(1)
+
+    with open(manifest_path) as f:
+        manifest = json.load(f)
+
+    emoji_list_data = manifest["emoji"]
+
+    # Generate HTML gallery
+    gallery_path = input_dir / "gallery.html"
+    rows = []
+    for e in emoji_list_data:
+        name = e["name"]
+        candidates = list(images_dir.glob(f"{name}.*"))
+        if not candidates:
+            continue
+        img_path = candidates[0].name
+        source = e.get("source", "")
+        badge = f' <span style="color:#888;font-size:11px">({source})</span>' if source else ""
+        rows.append(
+            f'<div style="display:inline-block;text-align:center;margin:6px;width:90px;vertical-align:top">'
+            f'<img src="images/{img_path}" style="width:48px;height:48px;object-fit:contain"><br>'
+            f'<span style="font-size:11px;word-break:break-all">{name}</span>{badge}'
+            f'</div>'
+        )
+
+    html = f"""<!DOCTYPE html>
+<html><head><title>Emoji Gallery ({len(rows)} emoji)</title>
+<style>body {{ font-family: -apple-system, sans-serif; padding: 20px; }}
+.header {{ margin-bottom: 20px; }}
+</style></head><body>
+<div class="header">
+<h2>Emoji Gallery — {len(rows)} emoji</h2>
+<p>Review these emoji. To remove unwanted ones:</p>
+<ol>
+<li>Open the <code>images/</code> folder in Finder (link below)</li>
+<li>Delete any images you don't want (Cmd+Delete)</li>
+<li>Run: <code>python emoji_migrate.py sync --input {input_dir}</code></li>
+</ol>
+<p><a href="file://{images_dir.resolve()}">Open images folder in Finder</a></p>
+</div>
+{"".join(rows)}
+</body></html>"""
+
+    with open(gallery_path, "w") as f:
+        f.write(html)
+
+    print(f"Gallery: {gallery_path}")
+    print(f"  {len(rows)} emoji displayed.")
+    print(f"\nOpening in browser ...")
+    os.system(f'open "{gallery_path}"')
+    print(f"\nAfter deleting unwanted images, run:")
+    print(f"  python mojis/emoji_migrate.py sync --input {input_dir}")
+
+
+def run_sync(args):
+    input_dir = Path(args.input)
+    manifest_path = input_dir / "manifest.json"
+    images_dir = input_dir / "images"
+
+    if not manifest_path.exists():
+        print(f"Error: {manifest_path} not found.", file=sys.stderr)
+        sys.exit(1)
+
+    with open(manifest_path) as f:
+        manifest = json.load(f)
+
+    before = len(manifest["emoji"])
+    kept = []
+    removed = []
+    for e in manifest["emoji"]:
+        candidates = list(images_dir.glob(f"{e['name']}.*"))
+        if candidates:
+            kept.append(e)
+        else:
+            removed.append(e["name"])
+
+    manifest["emoji"] = kept
+    with open(manifest_path, "w") as f:
+        json.dump(manifest, f, indent=2)
+
+    print(f"Synced manifest: {before} -> {len(kept)} emoji ({len(removed)} removed).")
+    if removed and len(removed) <= 20:
+        print(f"  Removed: {', '.join(removed)}")
+    elif removed:
+        print(f"  Removed: {', '.join(removed[:20])} ... and {len(removed) - 20} more")
 
 
 # ---------------------------------------------------------------------------
@@ -527,6 +636,16 @@ def main():
     exp.add_argument("--output", default="./my-emoji",
                      help="Output directory (default: ./my-emoji)")
 
+    # -- review --
+    rev = sub.add_parser("review", help="Open HTML gallery to visually review exported emoji")
+    rev.add_argument("--input", default="./my-emoji",
+                     help="Input directory with manifest.json (default: ./my-emoji)")
+
+    # -- sync --
+    syn = sub.add_parser("sync", help="Prune manifest to match remaining images (run after deleting unwanted images)")
+    syn.add_argument("--input", default="./my-emoji",
+                     help="Input directory with manifest.json (default: ./my-emoji)")
+
     # -- upload --
     up = sub.add_parser("upload", help="Upload emoji to a workspace")
     up.add_argument("--workspace", required=True,
@@ -539,6 +658,10 @@ def main():
     args = parser.parse_args()
     if args.command == "export":
         run_export(args)
+    elif args.command == "review":
+        run_review(args)
+    elif args.command == "sync":
+        run_sync(args)
     elif args.command == "upload":
         run_upload(args)
     else:

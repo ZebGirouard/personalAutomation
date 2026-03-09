@@ -4,3 +4,4 @@ mojis/images/
 mojis/*.uploaded
 mojis/*.json
 mojis/test-export/
+mojis/gallery.html
