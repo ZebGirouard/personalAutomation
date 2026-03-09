@@ -1,2 +1,6 @@
 outputs
 .DS_Store
+mojis/images/
+mojis/*.uploaded
+mojis/*.json
+mojis/test-export/

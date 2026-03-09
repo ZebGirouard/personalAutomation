@@ -1,5 +1,5 @@
-test -f '/Users/zebgirouard/.make-completion.zsh' && source '/Users/zebgirouard/.make-completion.zsh'
-test -f '/Users/zebgirouard/.git-completion.zsh' && source '/Users/zebgirouard/.git-completion.zsh'
+test -f "$HOME/.make-completion.zsh" && source "$HOME/.make-completion.zsh"
+test -f "$HOME/.git-completion.zsh" && source "$HOME/.git-completion.zsh"
 
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
@@ -12,6 +12,15 @@ eval "$(pyenv init -)"
 eval "$(fnm env --use-on-cd)"
 autoload -Uz compinit && compinit
 
-if [ -f '/Users/zebgirouard/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/zebgirouard/google-cloud-sdk/path.zsh.inc'; fi
+if [ -f "$HOME/google-cloud-sdk/path.zsh.inc" ]; then . "$HOME/google-cloud-sdk/path.zsh.inc"; fi
 
-if [ -f '/Users/zebgirouard/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/zebgirouard/google-cloud-sdk/completion.zsh.inc'; fi
+if [ -f "$HOME/google-cloud-sdk/completion.zsh.inc" ]; then . "$HOME/google-cloud-sdk/completion.zsh.inc"; fi
+
+# Set up fzf key bindings and fuzzy completion
+source <(fzf --zsh)
+
+# AWS CLI profile
+# Default profile "developer" seems to be what most folks use -- and it's useful (necessary?) for pulumi-login script to work
+export AWS_DEFAULT_PROFILE=developer
+# Even though ~/.aws/config has the default region, it seems to not always get picked up. So, set it here too.
+export AWS_DEFAULT_REGION=us-east-1

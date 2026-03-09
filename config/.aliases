@@ -9,6 +9,7 @@ alias awr="aws-vault clear & unset AWS_VAULT"
 alias bi="bundle install"
 alias berc="bundle exec rails console"
 alias berr="bundle exec rails runner"
+alias clc='claude --continue'
 
 alias dcd="docker-compose down"
 alias dcr="docker-compose run"
@@ -16,10 +17,9 @@ alias dcrberc="docker-compose run --rm web bundle exec rails console"
 alias dcrScript="docker-compose run --rm web bundle exec rails runner"
 alias dcu="docker-compose up"
 
-eval $(thefuck --alias fuck)
-eval $(thefuck --alias fcuk)
-eval $(thefuck --alias fukc)
-eval $(thefuck --alias ufck)
+function dojoId() {
+  printf '%s\n' "${(L)1:2:-8}"
+}
 
 alias ga="git add ."
 alias gb="git branch"
@@ -49,6 +49,10 @@ alias gshm="git stash push -m"
 alias gsp="git stash pop"
 alias gss="git status"
 
+function hexId() {
+  printf '%s\n' "0x${(U)1}00000000"
+}
+
 alias kctl-test='kubectl --context="aws/us-west-1-test"'
 alias kctl-ci='kubectl --context="aws/us-east-1-ci"'
 alias kctl-prod='kubectl --context="aws/us-east-1-prod"'
@@ -69,6 +73,7 @@ alias mloc="yarn next dev -p 3030"
 alias mps="make pre-start"
 alias mrd="make run-dev"
 alias msf="make start-fast"
+alias mtp="make test-parallel"
 alias mtw="CLEANUP_ON_FAILURE=yes make test-watch"
 alias mtwd="CLEANUP_ON_FAILURE=yes DEBUG=yes make test-watch"
 alias mwd="make watch-dev"
@@ -86,15 +91,18 @@ alias osim="open -a Simulator"
 alias pag="ps -ax | grep"
 alias p="pnpm"
 
-alias pusheen='git push -u origin `git rev-parse --abbrev-ref HEAD`'
-
 alias pp="netstat -vanp tcp | grep"
+
+alias prod='API_ENDPOINT=https://api.classdojo.com make run'
+alias ptype="make push-api-schemas-to-web"
 
 alias sbp="source ~/.bash_profile"
 alias sz="source ~/.zshrc"
 
 alias test-marketplace="yarn run mocha --parallel --jobs=5 test/models/Marketplace test/resources/marketplace test/jobs/marketplace test/businessLogic/marketplace"
 alias tmk="test-marketplace"
+
+# alias wt="git worktree"
 
 alias yi="yarn install"
 
