@@ -1,6 +1,6 @@
-# Slack Emoji Migration Tool
+# Slack Emoji Tools
 
-Export custom emoji from one Slack workspace and upload them to another.
+Download custom emoji from one Slack workspace, upload to another.
 
 ## Prerequisites
 
@@ -10,7 +10,7 @@ pip install requests browser_cookie3
 
 ## Setup (one-time per Slack workspace)
 
-You create a **new Slack app in each org** you want to export from or upload to.
+You create a **new Slack app in each org** you want to export from.
 The bot/user tokens are org-specific -- update your env vars when switching orgs.
 
 1. Go to https://api.slack.com/apps -> **Create New App** -> From Scratch
@@ -25,11 +25,11 @@ The bot/user tokens are org-specific -- update your env vars when switching orgs
    # ^^^ UPDATE THESE when you switch to a new org's Slack app
    ```
 
-## Export
+## Download (emoji_download.py)
 
+### Export
 ```bash
-# Export emoji you uploaded AND emoji you've used
-python mojis/emoji_migrate.py export \
+python mojis/emoji_download.py export \
   --mode both \
   --session-token xoxc-YOUR-SESSION-TOKEN \
   --user-id YOUR_MEMBER_ID \
@@ -37,7 +37,7 @@ python mojis/emoji_migrate.py export \
 # Find your member ID: Slack profile -> ... menu -> Copy member ID
 ```
 
-### Export modes
+Export is **additive-only** -- re-running only adds new emoji, never removes curated ones.
 
 | Mode | What it grabs | Auth needed |
 |------|--------------|-------------|
@@ -45,31 +45,38 @@ python mojis/emoji_migrate.py export \
 | `used` | Emoji you've reacted with | `--token` + `--user-token` (or env vars) |
 | `both` | Union of both (default) | All three |
 
-### Where to get the session token (xoxc-)
+### Review
+```bash
+python mojis/emoji_download.py review --input ./my-emoji
+```
+Opens an HTML gallery. Delete unwanted images in Finder, then sync.
 
-This is the only manual step per export session:
+### Sync
+```bash
+python mojis/emoji_download.py sync --input ./my-emoji
+```
+Prunes the manifest to match remaining images after manual curation.
 
-1. Open Slack in **Chrome** (the workspace you're exporting FROM)
-2. DevTools (`Cmd+Opt+I`) -> **Network** tab
-3. Filter for `/api/` -> click any request
-4. In the request payload, find `"token": "xoxc-..."`
-5. Copy the full `xoxc-...` value
-
-The `d` cookie is auto-read from Chrome -- no manual step needed.
-
-## Upload
+## Upload (emoji_upload.py)
 
 ```bash
-python mojis/emoji_migrate.py upload \
+python mojis/emoji_upload.py \
   --workspace neworg \
   --session-token xoxc-DESTINATION-SESSION-TOKEN \
   --input ./my-emoji
 ```
 
-- `--workspace` -- destination Slack subdomain (e.g. `neworg` for `neworg.slack.com`)
-- `--session-token` -- `xoxc-` token from the **destination** workspace (same DevTools method)
-- `--input` -- directory containing `manifest.json` (default: `./my-emoji`)
+- `--workspace` -- destination subdomain (e.g. `neworg` for `neworg.slack.com`)
+- Supports resume -- safe to re-run if interrupted
+- Make sure you're logged into the **destination** workspace in Chrome
 
-The `d` cookie is auto-read from Chrome. Make sure you're logged into the **destination** workspace in Chrome.
+## Where to get the session token (xoxc-)
 
-Supports resume -- tracks uploaded emoji in `.uploaded` so you can re-run safely.
+This is the only manual step, grab a fresh one each session:
+
+1. Open Slack in **Chrome** (source or destination workspace as needed)
+2. DevTools (`Cmd+Opt+I`) -> **Network** tab
+3. Filter for `/api/` -> click any request
+4. In the request payload, find `"token": "xoxc-..."` -> copy the full value
+
+The `d` cookie is auto-read from Chrome -- no manual step needed.

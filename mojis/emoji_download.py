@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Slack emoji migration tool — export from one workspace, upload to another.
+"""Download custom emoji from a Slack workspace.
 
 See README.md for setup instructions, or run with --help for auth details.
 Requires: pip install requests browser_cookie3
@@ -48,8 +48,8 @@ def read_d_cookie_from_chrome():
     """Auto-read the Slack 'd' cookie from Chrome's cookie store.
 
     Requires: pip install browser_cookie3
-    The 'd' cookie is set when you're logged into Slack in Chrome.
-    No manual step — this reads it directly from Chrome's local storage.
+    No manual step -- reads directly from Chrome's local storage.
+    Just be logged into Slack in Chrome (not just the desktop app).
     """
     try:
         import browser_cookie3
@@ -73,7 +73,7 @@ def read_d_cookie_from_chrome():
 
 
 # ---------------------------------------------------------------------------
-# Emoji list (bot token — all custom emoji in workspace)
+# Emoji list (bot token -- all custom emoji in workspace)
 # ---------------------------------------------------------------------------
 
 def fetch_all_custom_emoji(token):
@@ -102,15 +102,14 @@ def fetch_all_custom_emoji(token):
 
 
 # ---------------------------------------------------------------------------
-# Uploaded emoji (session auth — emoji.adminList with xoxc + d cookie)
+# Uploaded emoji (session auth -- emoji.adminList with xoxc + d cookie)
 # ---------------------------------------------------------------------------
 
 def fetch_uploaded_emoji(session_token, d_cookie, user_id):
     """Paginate emoji.adminList to find emoji uploaded by user_id.
 
-    Returns list of dicts with name, url, aliases, uploaded_by.
     Requires:
-      - session_token: xoxc-... (MANUAL: grab from browser DevTools Network tab)
+      - session_token: xoxc-... (MANUAL: Chrome DevTools -> Network -> any /api/ request -> "token" in payload)
       - d_cookie: auto-read from Chrome via browser_cookie3
     """
     page = 1
@@ -163,7 +162,7 @@ def fetch_uploaded_emoji(session_token, d_cookie, user_id):
 
 
 # ---------------------------------------------------------------------------
-# Reacted emoji (user token — reactions.list)
+# Reacted emoji (user token -- reactions.list)
 # ---------------------------------------------------------------------------
 
 def fetch_reacted_emoji_names(user_token, user_id):
@@ -171,7 +170,7 @@ def fetch_reacted_emoji_names(user_token, user_id):
 
     Requires:
       - user_token: xoxp-... with reactions:read scope
-        (from $SLACK_USER_TOKEN or --user-token)
+        ($SLACK_USER_TOKEN or --user-token)
     """
     headers = _auth_headers(user_token)
     page = 1
@@ -257,7 +256,7 @@ def run_export(args):
     images_dir = output / "images"
     images_dir.mkdir(exist_ok=True)
 
-    # Load existing manifest if present — export is additive-only
+    # Load existing manifest if present -- export is additive-only
     manifest_path = output / "manifest.json"
     existing_emoji = []
     existing_names = set()
@@ -352,7 +351,7 @@ def run_export(args):
 
 
 # ---------------------------------------------------------------------------
-# Review (gallery + sync)
+# Review (gallery)
 # ---------------------------------------------------------------------------
 
 def run_review(args):
@@ -369,7 +368,6 @@ def run_review(args):
 
     emoji_list_data = manifest["emoji"]
 
-    # Generate HTML gallery
     gallery_path = input_dir / "gallery.html"
     rows = []
     for e in emoji_list_data:
@@ -398,7 +396,7 @@ def run_review(args):
 <ol>
 <li>Open the <code>images/</code> folder in Finder (link below)</li>
 <li>Delete any images you don't want (Cmd+Delete)</li>
-<li>Run: <code>python emoji_migrate.py sync --input {input_dir}</code></li>
+<li>Run: <code>python emoji_download.py sync --input {input_dir}</code></li>
 </ol>
 <p><a href="file://{images_dir.resolve()}">Open images folder in Finder</a></p>
 </div>
@@ -413,8 +411,12 @@ def run_review(args):
     print(f"\nOpening in browser ...")
     os.system(f'open "{gallery_path}"')
     print(f"\nAfter deleting unwanted images, run:")
-    print(f"  python mojis/emoji_migrate.py sync --input {input_dir}")
+    print(f"  python emoji_download.py sync --input {input_dir}")
 
+
+# ---------------------------------------------------------------------------
+# Sync (prune manifest to match remaining images)
+# ---------------------------------------------------------------------------
 
 def run_sync(args):
     input_dir = Path(args.input)
@@ -450,128 +452,10 @@ def run_sync(args):
 
 
 # ---------------------------------------------------------------------------
-# Upload
-# ---------------------------------------------------------------------------
-
-def upload_emoji_image(workspace, cookie, xoxc_token, name, image_path):
-    with open(image_path, "rb") as f:
-        resp = requests.post(
-            f"https://{workspace}.slack.com/api/emoji.add",
-            headers={"Cookie": f"d={cookie}"},
-            data={"mode": "data", "name": name, "token": xoxc_token},
-            files={"image": (image_path.name, f)},
-        )
-    resp.raise_for_status()
-    return resp.json()
-
-
-def upload_alias(workspace, cookie, xoxc_token, alias_name, original_name):
-    resp = requests.post(
-        f"https://{workspace}.slack.com/api/emoji.add",
-        headers={"Cookie": f"d={cookie}"},
-        data={
-            "mode": "alias",
-            "name": alias_name,
-            "alias_for": original_name,
-            "token": xoxc_token,
-        },
-    )
-    resp.raise_for_status()
-    return resp.json()
-
-
-def run_upload(args):
-    workspace = args.workspace
-    xoxc = args.session_token or os.environ.get("SLACK_SESSION_TOKEN")
-    input_dir = Path(args.input)
-    manifest_path = input_dir / "manifest.json"
-    images_dir = input_dir / "images"
-
-    if not manifest_path.exists():
-        print(f"Error: {manifest_path} not found.", file=sys.stderr)
-        sys.exit(1)
-
-    if not xoxc:
-        print("Error: --session-token is required for upload.", file=sys.stderr)
-        print("  Get it: open DESTINATION workspace in Chrome -> DevTools -> Network -> filter '/api/' -> find 'token' in any request payload", file=sys.stderr)
-        sys.exit(1)
-
-    # Auto-read d cookie from Chrome
-    print("Reading d cookie from Chrome ...")
-    d_cookie = read_d_cookie_from_chrome()
-    print("  Got d cookie.")
-
-    with open(manifest_path) as f:
-        manifest = json.load(f)
-
-    # Resume support
-    uploaded_file = input_dir / ".uploaded"
-    already_uploaded = set()
-    if uploaded_file.exists():
-        already_uploaded = set(uploaded_file.read_text().splitlines())
-
-    emoji_list_data = manifest["emoji"]
-    to_upload = [e for e in emoji_list_data if e["name"] not in already_uploaded]
-    print(f"Uploading {len(to_upload)} emoji ({len(already_uploaded)} already done) ...")
-
-    with open(uploaded_file, "a") as tracker:
-        for i, e in enumerate(to_upload):
-            name = e["name"]
-            candidates = list(images_dir.glob(f"{name}.*"))
-            if not candidates:
-                print(f"  SKIP {name}: no image file found")
-                continue
-
-            image_path = candidates[0]
-            result = upload_emoji_image(workspace, d_cookie, xoxc, name, image_path)
-
-            if result.get("ok"):
-                print(f"  OK   {name}")
-                tracker.write(name + "\n")
-                tracker.flush()
-            elif result.get("error") == "error_name_taken":
-                print(f"  EXISTS {name}")
-                tracker.write(name + "\n")
-                tracker.flush()
-            elif result.get("error") == "ratelimited":
-                wait = int(result.get("retry_after", 5))
-                print(f"  RATE LIMITED — waiting {wait}s ...")
-                time.sleep(wait)
-                result = upload_emoji_image(workspace, d_cookie, xoxc, name, image_path)
-                if result.get("ok") or result.get("error") == "error_name_taken":
-                    tracker.write(name + "\n")
-                    tracker.flush()
-                else:
-                    print(f"  FAIL {name}: {result.get('error')}")
-            else:
-                print(f"  FAIL {name}: {result.get('error')}")
-
-            if (i + 1) % 10 == 0:
-                time.sleep(1)
-
-    # Aliases
-    print("Creating aliases ...")
-    for e in emoji_list_data:
-        for alias in e.get("aliases", []):
-            if alias in already_uploaded:
-                continue
-            result = upload_alias(workspace, d_cookie, xoxc, alias, e["name"])
-            if result.get("ok"):
-                print(f"  ALIAS {alias} -> {e['name']}")
-            elif result.get("error") == "error_name_taken":
-                print(f"  EXISTS {alias}")
-            else:
-                print(f"  FAIL alias {alias}: {result.get('error')}")
-            time.sleep(0.5)
-
-    print("Done.")
-
-
-# ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
 
-AUTH_HELP = """
+HELP_EPILOG = """
 AUTH GUIDE
 ==========
 
@@ -582,47 +466,42 @@ TOKENS YOU NEED:
      -> https://api.slack.com/apps -> Create New App (one per workspace/org)
      -> OAuth & Permissions -> Bot Token Scopes -> add emoji:read, reactions:read
      -> Install to Workspace -> copy "Bot User OAuth Token"
-     Used for: listing all workspace emoji.
 
   2. User token ($SLACK_USER_TOKEN or --user-token):
      xoxp-... with 'reactions:read' scope.
      -> Same app -> OAuth & Permissions -> User Token Scopes -> add reactions:read
      -> Reinstall if needed -> copy "User OAuth Token"
-     Used for: reading YOUR reactions (bot token can only read its own).
 
   3. Session token (--session-token):
      xoxc-... grabbed from browser DevTools.
      -> Open Slack in Chrome -> DevTools (Cmd+Opt+I) -> Network tab
      -> Filter for "/api/" -> click any request
      -> In the request payload, find "token": "xoxc-..."
-     Used for: emoji.adminList (uploaded-by info) and uploading emoji.
-     NOTE: This token rotates — grab a fresh one each session.
+     NOTE: This token rotates -- grab a fresh one each session.
 
   4. d cookie (AUTO-READ from Chrome):
-     No manual step! Read automatically via browser_cookie3.
-     Just be logged into Slack in Chrome.
+     No manual step! Just be logged into Slack in Chrome.
 
   5. User ID (--user-id):
-     -> Open Slack -> click your profile picture -> "Profile"
-     -> Click "..." menu -> "Copy member ID"
+     -> Slack profile -> "..." menu -> "Copy member ID"
 
 EXPORT MODES:
-  uploaded  — emoji YOU uploaded (needs session-token)
-  used      — emoji you've reacted with (needs bot-token + user-token)
-  both      — union of uploaded + used
+  uploaded  -- emoji YOU uploaded (needs session-token)
+  used      -- emoji you've reacted with (needs bot-token + user-token)
+  both      -- union of uploaded + used
 """
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Slack emoji migration tool",
-        epilog=AUTH_HELP,
+        description="Download custom emoji from a Slack workspace",
+        epilog=HELP_EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     sub = parser.add_subparsers(dest="command")
 
     # -- export --
-    exp = sub.add_parser("export", help="Export emoji from a workspace")
+    exp = sub.add_parser("export", help="Export emoji from a workspace (additive-only)")
     exp.add_argument("--mode", choices=["uploaded", "used", "both"], default="both",
                      help="What to export (default: both)")
     exp.add_argument("--user-id", required=True,
@@ -642,18 +521,9 @@ def main():
                      help="Input directory with manifest.json (default: ./my-emoji)")
 
     # -- sync --
-    syn = sub.add_parser("sync", help="Prune manifest to match remaining images (run after deleting unwanted images)")
+    syn = sub.add_parser("sync", help="Prune manifest to match remaining images (after deleting in Finder)")
     syn.add_argument("--input", default="./my-emoji",
                      help="Input directory with manifest.json (default: ./my-emoji)")
-
-    # -- upload --
-    up = sub.add_parser("upload", help="Upload emoji to a workspace")
-    up.add_argument("--workspace", required=True,
-                    help="Destination workspace subdomain (e.g. 'neworg' for neworg.slack.com)")
-    up.add_argument("--session-token", default=None,
-                    help="Session token xoxc- from DESTINATION workspace (Chrome DevTools)")
-    up.add_argument("--input", default="./my-emoji",
-                    help="Input directory with manifest.json (default: ./my-emoji)")
 
     args = parser.parse_args()
     if args.command == "export":
@@ -662,8 +532,6 @@ def main():
         run_review(args)
     elif args.command == "sync":
         run_sync(args)
-    elif args.command == "upload":
-        run_upload(args)
     else:
         parser.print_help()
         sys.exit(1)
